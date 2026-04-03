@@ -1,7 +1,23 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from pathlib import Path
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+PLOT_DIR = Path(__file__).resolve().parents[2] / "model_plots"
+
+
+def _save_plot(filename=None):
+    """
+    Saves the current plot in the model_plots folder when a filename is provided.
+    """
+
+    if not filename:
+        return
+
+    PLOT_DIR.mkdir(exist_ok=True)
+    plt.tight_layout()
+    plt.savefig(PLOT_DIR / filename, dpi=300, bbox_inches="tight")
 
 
 def evaluate_model(y_true, y_pred):
@@ -24,7 +40,8 @@ def evaluate_model(y_true, y_pred):
         "R2": r2
     }
 
-def plot_predictions(y_true, y_pred):
+
+def plot_predictions(y_true, y_pred, filename=None):
     """
     Real X Predicted Plot
     """
@@ -41,9 +58,11 @@ def plot_predictions(y_true, y_pred):
     plt.legend()
     plt.grid(True)
 
+    _save_plot(filename)
     plt.show()
 
-def plot_feature_importance(feature_importance):
+
+def plot_feature_importance(feature_importance, filename=None):
     """
     Plots feature importance
     """
@@ -63,7 +82,9 @@ def plot_feature_importance(feature_importance):
 
     plt.grid(True)
 
+    _save_plot(filename)
     plt.show()
+
 
 def create_results_df(y_true, y_pred):
     """
@@ -76,6 +97,7 @@ def create_results_df(y_true, y_pred):
     })
 
     return results
+
 
 def compare_with_baseline(y_true, y_pred, y_baseline):
 
@@ -96,7 +118,8 @@ def compare_with_baseline(y_true, y_pred, y_baseline):
     print(f"Model  -> RMSE: {model_rmse:.4f} | MAE: {model_mae:.4f}")
     print(f"Baseline-> RMSE: {base_rmse:.4f} | MAE: {base_mae:.4f}")
 
-def plot_model_vs_baseline(y_true, y_pred, y_baseline):
+
+def plot_model_vs_baseline(y_true, y_pred, y_baseline, filename=None):
     """
     Creates a bar plot to compare model vs baseline
     """
@@ -106,11 +129,63 @@ def plot_model_vs_baseline(y_true, y_pred, y_baseline):
     plt.plot(y_pred, label='Model')
     plt.plot(y_baseline.values, label='Baseline', linestyle='--')
 
-    plt.title('Modelo vs Baseline')
+    plt.title('Model vs Baseline')
     plt.xlabel('Observations')
     plt.ylabel('Price')
 
     plt.legend()
     plt.grid(True)
 
+    _save_plot(filename)
     plt.show()
+
+
+def plot_model_performance_comparison(y_true, rf_pred, gb_pred, y_baseline, filename=None):
+    """
+    Plots a comparison of performance metrics for Random Forest,
+    Gradient Boosting and Baseline.
+    """
+
+    model_names = ['Random Forest', 'Gradient Boosting', 'Baseline']
+    predictions = [rf_pred, gb_pred, y_baseline]
+
+    metrics_df = pd.DataFrame([
+        {
+            'Model': model_name,
+            'RMSE': np.sqrt(mean_squared_error(y_true, y_pred)),
+            'MAE': mean_absolute_error(y_true, y_pred),
+            'R2': r2_score(y_true, y_pred)
+        }
+        for model_name, y_pred in zip(model_names, predictions)
+    ])
+
+    x = np.arange(len(model_names))
+    width = 0.25
+
+    plt.figure(figsize=(12, 6))
+    plt.bar(x - width, metrics_df['RMSE'], width=width, label='RMSE')
+    plt.bar(x, metrics_df['MAE'], width=width, label='MAE')
+    plt.bar(x + width, metrics_df['R2'], width=width, label='R2')
+
+    plt.title('Model Performance Comparison')
+    plt.xlabel('Model')
+    plt.ylabel('Metric Value')
+    plt.xticks(x, model_names, rotation=10)
+    plt.legend()
+    plt.grid(axis='y', linestyle='--', alpha=0.4)
+
+    _save_plot(filename)
+    plt.show()
+
+
+def compare_models(y_test, rf_pred, gb_pred, y_baseline):
+    print("\nModel Comparison:")
+
+    print("\nRandom Forest:")
+    evaluate_model(y_test, rf_pred)
+
+    print("\nGradient Boosting:")
+    evaluate_model(y_test, gb_pred)
+
+    print("\nBaseline:")
+    evaluate_model(y_test, y_baseline)

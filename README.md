@@ -1,137 +1,127 @@
-📈 Stock Market Analysis & Prediction
+# Stock Market Analysis and Prediction
 
-📌 Overview
+This project analyzes historical stock data from major tech companies and builds machine learning models to predict the next day's return.
 
-This project focuses on analyzing and predicting stock market behavior using historical data from major tech companies (Google, Tesla, Microsoft, Amazon).
+The current pipeline compares three approaches:
 
-The goal is to:
+- `Random Forest`
+- `Gradient Boosting`
+- `Baseline` using the current day's return as the next day's prediction
 
-Perform Exploratory Data Analysis (EDA)
-Engineer meaningful financial features
-Build a predictive model for stock returns
-Compare performance against a strong baseline
+## Objective
 
-🧠 Problem Statement
+Instead of predicting raw prices directly, the project reframes the problem as a return prediction task. This makes the target more stable and better suited for supervised learning.
 
-Predicting stock prices directly is extremely difficult due to noise and market efficiency.
+## Current Results
 
-Instead, this project reframes the problem to:
+The latest training and evaluation flow compares the two trained models against the baseline on the same test split.
 
-👉 Predict daily returns rather than raw prices
+| Model | RMSE | MAE | R2 |
+| --- | ---: | ---: | ---: |
+| Random Forest | 0.020637 | 0.014463 | -0.008135 |
+| Gradient Boosting | 0.021563 | 0.015466 | -0.100594 |
+| Baseline | 0.028464 | 0.020393 | -0.917832 |
 
-This allows the model to better capture short-term patterns and temporal dependencies.
+![Model Performance Comparison](model_plots/model_performance_comparison.png)
 
+## Main Takeaways
+
+- `Random Forest` is the best-performing model in the current version.
+- Both machine learning models outperform the baseline in `RMSE` and `MAE`.
+- `Gradient Boosting` also improves over the baseline, but does not reach the same performance as `Random Forest`.
+- The strongest gains came from reframing the task to returns and adding lag-based features.
+
+## Features Used
+
+The models are trained using the following predictors:
+
+- `Return`
+- `MA_10`
+- `MA_50`
+- `Vol_10`
+- `Return_Lag_1`
+- `Return_Lag_2`
+- `Return_Lag_3`
+
+## Generated Plots
+
+Running the training script now saves model evaluation charts automatically in the `model_plots/` folder:
+
+- `random_forest_predictions.png`
+- `random_forest_feature_importance.png`
+- `random_forest_vs_baseline.png`
+- `gradient_boosting_predictions.png`
+- `gradient_boosting_feature_importance.png`
+- `gradient_boosting_vs_baseline.png`
+- `model_performance_comparison.png`
+
+These plots include:
+
+- actual vs predicted values
+- feature importance for each model
+- model vs baseline comparisons
+- a final comparison chart for `Random Forest`, `Gradient Boosting`, and `Baseline`
+
+### Example Visuals
+
+![Random Forest vs Baseline](model_plots/random_forest_vs_baseline.png)
+
+![Gradient Boosting Feature Importance](model_plots/gradient_boosting_feature_importance.png)
+
+## Project Structure
+
+```bash
+stock-analysis/
+|-- data/
+|   |-- processed/
+|   `-- raw/
+|-- model_plots/
+|-- notebooks/
+|   `-- analysis.ipynb
+|-- src/
+|   |-- analysis.py
+|   |-- data_collection.py
+|   |-- feature_engineering.py
+|   |-- preprocessing.py
+|   |-- visualization.py
+|   `-- models/
+|       |-- evaluate.py
+|       |-- predict.py
+|       |-- train.py
+|       `-- utils.py
+|-- insights.md
+|-- main.py
+|-- requirements.txt
+|-- train_model.py
+`-- README.md
 ```
-⚙️ Stock-Analysis
-├── data/
-│   ├── processed/
-│   └── raw/
-├── src/
-│   ├── analysis.py
-│   ├── data_collection.py
-│   ├── feature_engineering.py
-│   ├── preprocessing.py
-│   ├── visualization.py
-│   ├── models/
-│   │   ├── train.py
-│   │   ├── evaluate.py
-│   │   ├── predict.py
-│   │   └── utils.py
-├── notebooks/
-│   └── analysis.ipynb
-├── main.py
-├── train_model.py
-├── requirements.txt
-├── README.md
-└── insights.md
+
+## Workflow
+
+1. Load raw stock data
+2. Engineer returns, moving averages, volatility, and lag features
+3. Create the prediction target as the next day's return
+4. Split the dataset using time order
+5. Train `Random Forest` and `Gradient Boosting`
+6. Compare both models with the baseline
+7. Save evaluation plots in `model_plots/`
+
+## How to Run
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
 ```
 
-📊 Exploratory Data Analysis (EDA)
+Run the full training and evaluation pipeline:
 
-Key analyses performed:
+```bash
+python train_model.py
+```
 
-Accumulated return per asset
-Price evolution over time
-Return distribution (mean, median, skewness)
-Volatility (daily and rolling)
-Correlation between assets
-Maximum drawdown
+## Notes
 
-🔍 Key Findings
-Tesla is the most volatile asset and also offers the highest risk-return profile
-Google achieved the highest accumulated return over the period
-Returns distribution shows positive skewness (0.31) → more extreme positive returns
-Strong correlations between big tech stocks (especially Microsoft & Amazon)
-Tesla experienced the largest drawdown (~73%), highlighting its risk
-
-🏗️ Feature Engineering
-
-Features used:
-
-Moving Averages (MA_10, MA_50)
-Rolling Volatility (Vol_10)
-Lagged Returns (Return_Lag_1, Return_Lag_2, Return_Lag_3)
-
-⚠️ Important:
-
-The current return is NOT used as feature to avoid data leakage
-
-🤖 Model
-
-Model used:
-
-👉 Random Forest Regressor
-
-Target:
-
-👉 Daily Return
-
-📏 Evaluation
-
-Model Performance
-RMSE: 0.0209
-MAE: 0.0145
-R²: -0.0431
-
-Baseline (Previous Day Return)
-RMSE: 0.0283
-MAE: 0.0202
-
-✅ The model outperforms the baseline, indicating it captures useful patterns.
-
-🧠 Feature Importance
-
-Top features:
-
-Return_Lag_3
-Return_Lag_2
-Return_Lag_1
-
-👉 The model relies heavily on past returns, which aligns with financial intuition.
-
-🚀 How to Run
-1. Preprocess data
-python main.py --step preprocess
-2. Train model
-python main.py --step train
-3. Evaluate
-python main.py --step evaluate
-4. Predict
-python main.py --step predict
-
-🔮 Future Improvements
-Try Gradient Boosting / XGBoost
-Predict direction (classification)
-Add more lag features
-Time-series cross-validation
-Build a dashboard (Streamlit)
-
-📌 Conclusion
-
-This project demonstrates how reframing a problem and applying proper feature engineering can significantly improve model performance.
-
-It highlights the importance of:
-
-Baseline comparison
-Avoiding data leakage
-Understanding time series behavior
+- The baseline is intentionally simple and serves as a reference point.
+- In this project, lower `RMSE` and `MAE` indicate better predictive performance.
+- The negative `R2` values show the task remains difficult, even though the trained models clearly improve over the naive baseline.
