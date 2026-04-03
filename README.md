@@ -21,7 +21,8 @@ Instead, this project reframes the problem to:
 
 This allows the model to better capture short-term patterns and temporal dependencies.
 
-⚙️ Project Structure
+```
+⚙️ Stock-Analysis
 ├── data/
 │   ├── processed/
 │   └── raw/
@@ -43,6 +44,7 @@ This allows the model to better capture short-term patterns and temporal depende
 ├── requirements.txt
 ├── README.md
 └── insights.md
+```
 
 📊 Exploratory Data Analysis (EDA)
 
